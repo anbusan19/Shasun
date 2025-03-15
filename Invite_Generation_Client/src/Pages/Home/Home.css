@@ -1,0 +1,138 @@
+/* 🔹 Ensures Full-Width Background */
+.home-container {
+  position: relative;
+  width: 100vw;
+  min-height: 100vh;
+  background: url("/src/assets/college_img.jpg") no-repeat center center/cover;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Ensures footer sticks at the bottom */
+  margin-bottom: -40px;
+  overflow-x: hidden;
+}
+
+/* 🔹 Navbar Fix */
+.home-header {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  padding: 15px 3%;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* 🔹 Ensures Image Doesn't Shrink */
+.college-logo {
+  height: 70px;
+  max-width: 100%;
+  margin-left: 2%;
+  object-fit: contain;
+}
+
+/* 🔹 Scroll to Top Button */
+.scroll-top {
+  position: fixed;
+  width: 40px;
+  bottom: 5%;
+  right: 5%;
+  background-color: rgb(220,53,69);
+  color: white;
+  padding: 12px;
+  border-radius: 5px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  border: none;
+}
+
+/* 🔹 Adjusting Hero Section */
+.hero-section {
+  flex-grow: 1; /* Ensures hero section expands */
+  display: flex;
+  flex-direction: column; /* Stack button and title vertically */
+  align-items: stretch; /* Stretch children to full width */
+  justify-content: center; /* Center content vertically */
+  text-align: center;
+  width: 100%;
+  padding: 5%;
+  overflow-x: hidden;
+}
+
+/* 🔹 Button Fix */
+.invite-button {
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 15px 30px;
+  border-radius: 5px;
+  background-color: rgb(220, 53, 69);
+  color: white;
+  margin-left: -90%; /* Align button to the left */
+  margin-top: 100px; /* Add space between button and title */
+}
+
+/* 🔹 Title Fix */
+.hero-title {
+  font-size: 8vw;
+  color: #00008a;
+  align-self: flex-end; /* Align title to the right */
+  text-align: right;
+}
+/* 🔹 Fixing for Larger Screens */
+@media (min-width: 1024px) {
+  .hero-section {
+    width: 90%;
+  }
+}
+
+/* 🔹 Fixing for Tablets */
+@media (max-width: 1024px) {
+  .college-logo {
+    height: 60px;
+  }
+  .hero-title {
+    font-size: 7vw;
+  }
+}
+
+/* 🔹 Mobile Screens */
+@media (max-width: 768px) {
+  .hero-section {
+    flex-direction: column; /* Stack button and title */
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .hero-title {
+    font-size: 8vw;
+    margin: 0;
+    text-align: center;
+  }
+
+  .college-logo {
+    height: 50px;
+  }
+
+  .invite-button {
+    font-size: 1rem;
+    padding: 12px 25px;
+    margin: 10px auto;
+  }
+}
+
+/* 🔹 Mobile Fix (Small Screens) */
+@media (max-width: 480px) {
+  .college-logo {
+    height: 45px;
+  }
+
+  .hero-title {
+    font-size: 9vw;
+  }
+
+  .scroll-top {
+    width: 35px;
+    padding: 10px;
+  }
+}

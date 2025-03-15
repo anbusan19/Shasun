@@ -1,0 +1,139 @@
+body {
+    margin: 0;
+    padding: 0;
+    background-image: url('./bg-opaque.jpeg'); 
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; 
+    position: relative;
+    min-height: 100vh; 
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5); 
+    z-index: -1; 
+}
+
+.container {
+    width: 60%;
+    margin: 3% auto;
+    padding: 20px;
+    padding-right: 40px;
+    background-color: rgba(247, 247, 247, 0.9);
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    position: relative; 
+    z-index: 1;
+}
+
+.container input[type="text"],
+.container input[type="date"],
+.container input[type="time"],
+.container select,
+.container input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    margin: 4px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff; 
+    color: #333;
+}
+
+.container select {
+    width: 103%;
+    padding: 8px;
+    margin: 4px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    background-color: #fff; 
+    color: #333;
+}
+
+.container button {
+    background-color: #e0e0e0;
+    border: 1px solid #ccc;
+    padding: 8px 12px;
+    border-radius: 4px;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 8px;
+}
+
+.container button:hover {
+    background-color: #d5d5d5;
+}
+
+.invite-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.a4-container {
+    width: 210mm;
+    height: 297mm;
+    padding: 20mm;
+    background: white;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.buttons-container {
+    display: flex;
+    gap: 10px;
+}
+
+.buttons-container button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.buttons-container button:hover {
+    background-color: #0056b3;
+}
+
+@media (max-width: 768px) {
+    .container {
+        width: 80%; 
+        padding: 15px;
+    }
+
+    .container input[type="text"],
+    .container input[type="date"],
+    .container input[type="time"],
+    .container select,
+    .container input[type="file"] {
+        width: 90%;
+        font-size: 16px; 
+        padding: 10px;
+    }
+
+    .container select {
+        width: 96%;
+    }
+
+    .a4-container {
+        width: 100%;
+        height: auto;
+        padding: 10px;
+    }
+
+    .buttons-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+}

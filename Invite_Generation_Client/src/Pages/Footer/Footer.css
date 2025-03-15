@@ -1,0 +1,103 @@
+/* Footer.css */
+
+.footer {
+    /* additional styles if needed */
+  }
+  
+  /* Container for the entire footer */
+  .footer-container {
+    background-color: #343a40; /* dark background */
+    color: #f8f9fa; /* light text */
+    padding-top: 3rem;
+    margin-top: 3rem;
+  }
+  
+  /* Inner container with padding */
+  .footer-inner {
+    padding: 3rem 0;
+  }
+  
+  /* Quick Link, Contact, Gallery, Newsletter columns */
+  .footer-column {
+    margin-bottom: 1rem;
+  }
+  
+  /* Buttons styled as links */
+  .footer-column .btn-link {
+    color: #f8f9fa;
+    text-decoration: none;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  
+  .footer-column .btn-link:hover {
+    text-decoration: underline;
+  }
+  
+  /* Gallery images */
+  .footer-gallery img {
+    width: 100%;
+    padding: 0.25rem;
+    background-color: #fff;
+  }
+  
+  /* Newsletter container */
+  .newsletter-container {
+    max-width: 400px;
+    margin: 0 auto;
+    position: relative;
+  }
+  
+  /* Newsletter input */
+  .newsletter-container input[type="text"] {
+    width: 100%;
+    padding: 12px 12px 12px 16px;
+    border: 0;
+    border-radius: 4px;
+    background-color: #fff;
+    color: #333;
+    text-align: center;
+  }
+  
+  /* Newsletter button */
+  .newsletter-container .newsletter-btn {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .newsletter-container .newsletter-btn:hover {
+    background-color: #c82333;
+  }
+  
+  /* Copyright */
+  .footer .copyright a {
+    color: #f8f9fa;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-bottom 0.3s;
+  }
+  
+  .footer .copyright a:hover {
+    border-bottom: 1px solid #f8f9fa;
+  }
+  
+  /* Footer menu links */
+  .footer-menu a {
+    color: #f8f9fa;
+    margin-left: 1rem;
+    text-decoration: none;
+  }
+  
+  .footer-menu a:hover {
+    text-decoration: underline;
+  }
+  
