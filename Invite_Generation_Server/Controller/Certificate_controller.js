@@ -87,25 +87,26 @@ const generateCertificate = (req, res) => {
         // Logos Section
         const logoY = 60;
         const logoHeight = 80;
-        const leftLogoWidth = 80;
-        const collegeLogoWidth = 275;
-        const rightLogosWidth = 80;
-        const totalRightLogos = collaboratorLogos ? collaboratorLogos.length : 0;
-        const totalWidth = collegeLogoWidth + leftLogoWidth + totalRightLogos * rightLogosWidth + 10 * (totalRightLogos - 1);
-        const centerX = (doc.page.width - totalWidth) / 2;
-        const leftLogoX = centerX;
-        const collegeLogoX = leftLogoX + leftLogoWidth + 10;
-        const rightLogosX = collegeLogoX + collegeLogoWidth + 10;
-
-        if (clubLogo?.[0]?.path) {
-            doc.image(clubLogo[0].path, leftLogoX, logoY, { width: leftLogoWidth, height: logoHeight });
-        }
+        const collegeLogoWidth = 250; // Reduced width for better proportion
+        
+        // Center the college logo
+        const collegeLogoX = (doc.page.width - collegeLogoWidth) / 2;
+        
+        // Place the college logo in the center
         const logoPath = path.join(__dirname, './college_logo.png');
         doc.image(logoPath, collegeLogoX, logoY, { width: collegeLogoWidth, height: logoHeight });
+
+        // Place club logo and collaborator logos if they exist
+        if (clubLogo?.[0]?.path) {
+            const leftLogoWidth = 60;
+            doc.image(clubLogo[0].path, 50, logoY, { width: leftLogoWidth, height: logoHeight });
+        }
+        
         if (collaboratorLogos) {
+            const rightLogosWidth = 60;
             collaboratorLogos.forEach((logo, index) => {
-                const posX = rightLogosX + index * (rightLogosWidth + 10);
                 if (logo?.path) {
+                    const posX = doc.page.width - 50 - (rightLogosWidth * (index + 1)) - (10 * index);
                     doc.image(logo.path, posX, logoY, { width: rightLogosWidth, height: logoHeight });
                 }
             });
@@ -162,60 +163,61 @@ const generateCertificate = (req, res) => {
 
         doc.fillColor([36, 27, 156])
            .font('Times-Bold')
-           .fontSize(18)
+           .fontSize(22)
            .text(`Cordially invites you for the`, { align: 'center' });
+        doc.moveDown(0.3);
+
         if (eventType) {
             doc.fillColor([181,13,14])
-           .font('Times-Bold')
-           .fontSize(20)
-           .text(`${eventType}` , { align: 'center' });
+               .font('Times-Bold')
+               .fontSize(26)
+               .text(`${eventType}`, { align: 'center' });
         } else {
             doc.fillColor([181,13,14])
-           .font('Times-Bold')
-           .fontSize(20)
-           .text(`${eventTitle}` , { align: 'center' });
+               .font('Times-Bold')
+               .fontSize(26)
+               .text(`${eventTitle}`, { align: 'center' });
         }
         
+        doc.moveDown(0.3);
         doc.fillColor([181,13,14])
            .font('Times-Bold')
-           .fontSize(14)
+           .fontSize(18)
            .text(subtitle, { align: 'center' });
-        doc.moveDown(-0.4);
+        doc.moveDown(0.5);
 
         if (titlesArray.length > 0) {
-            let formattedTitles = titlesArray.join("\n"); // Each title on a new line
+            let formattedTitles = titlesArray.join("\n");
         
             doc.fillColor([181, 13, 14])
                .font('Times-Bold')
-               .fontSize(18)
-               .text("On", { align: 'center' }) // "On" on one line
-               .text(formattedTitles, { align: 'center' }) // Titles on separate lines
-               .moveDown();
+               .fontSize(20)
+               .text("On", { align: 'center' })
+               .text(formattedTitles, { align: 'center' })
+               .moveDown(0.5);
         }
 
         // Resource People Section (only if chief guests exist)
         if (chiefGuestsArray && chiefGuestsArray.length > 0 ) {
+            doc.moveDown(0.3);
             if (chiefGuestsArray && chiefGuestsArray.length > 1) {
                 doc.fillColor([181,13,14])
-                .font('Times-Bold')
-                .fontSize(14)
-                .text("Resource People", { align: 'center' });
-                // doc.moveDown();
+                   .font('Times-Bold')
+                   .fontSize(22)
+                   .text("Resource People", { align: 'center' });
             } else {
                 doc.fillColor([181,13,14])
-                .font('Times-Bold')
-                .fontSize(14)
-                .text("Resource Person", { align: 'center' });
-                // doc.moveDown();
+                   .font('Times-Bold')
+                   .fontSize(22)
+                   .text("Resource Person", { align: 'center' });
             }
-        } else {
-            doc.moveDown();
+            doc.moveDown(0.5);
         }
                   
         // Chief Guest Section
         const guestCount = chiefGuestsArray.length;
-        const guestY = doc.y + 15;
-        const imageSize = 80;
+        const guestY = doc.y + 10;
+        const imageSize = 100;
         let guestXPositions = [];
 
         if (guestCount === 1) {
@@ -247,7 +249,7 @@ const generateCertificate = (req, res) => {
             }
 
             // Calculate text position
-            const textY = guestY + imageSize + 10;
+            const textY = guestY + imageSize + 8;
             const textWidth = doc.page.width / guestCount - 10;
 
             // Construct guest details
@@ -255,160 +257,137 @@ const generateCertificate = (req, res) => {
             const designation = guest.designation || '';
             const additionalText = guest.additionalText || '';
 
-            // Render guest name
+            // Render guest name with larger font
             doc.font('Times-Bold')
-            .fontSize(12)
-            .fillColor([181, 13, 14]) 
-            .text(fullName, guestX - (textWidth / 2) + (imageSize / 2), textY, {
-                align: 'center',
-                width: textWidth
-            });
+               .fontSize(20)
+               .fillColor([181, 13, 14])
+               .text(fullName, guestX - (textWidth / 2) + (imageSize / 2), textY, {
+                   align: 'center',
+                   width: textWidth
+               });
 
+            doc.moveDown(0.2);
            
+            // Render designation with larger font
             doc.font('Times-Bold')
-            .fontSize(10)
-            .fillColor([36, 27, 156]) 
-            .text(designation, guestX - (textWidth / 2) + (imageSize / 2), textY + 14, {
-                align: 'center',
-                width: textWidth
-            });
+               .fontSize(18)
+               .fillColor([36, 27, 156])
+               .text(designation, guestX - (textWidth / 2) + (imageSize / 2), doc.y, {
+                   align: 'center',
+                   width: textWidth
+               });
 
-            
-            doc.font('Times-Bold')
-            .fontSize(10)
-            .fillColor([36, 27, 156]) 
-            .text(additionalText, guestX - (textWidth / 2) + (imageSize / 2), textY + 28, {
-                align: 'center',
-                width: textWidth
-            });
+            if (additionalText) {
+                doc.moveDown(0.2);
+                doc.font('Times-Bold')
+                   .fontSize(16)
+                   .fillColor([36, 27, 156])
+                   .text(additionalText, guestX - (textWidth / 2) + (imageSize / 2), doc.y, {
+                       align: 'center',
+                       width: textWidth
+                   });
+            }
         });
                 
                 doc.moveDown(0.5);
 
-        // Time, Date and End Date Section
-        const textSize = 19;
-        doc.font('Times-Bold').fontSize(textSize);
+        // Move date, time and venue to bottom
+        // Calculate position above signatories
+        const signatoryY = doc.page.height - 107;
+        const detailsY = signatoryY - 100; // Position details 100 points above signatories
 
         // Function to get ordinal suffix
         const getOrdinalSuffix = (day) => {
-        if (day >= 11 && day <= 13) return "th";
-        switch (day % 10) {
-            case 1: return "st";
-            case 2: return "nd";
-            case 3: return "rd";
-            default: return "th";
-        }
+            if (day >= 11 && day <= 13) return "th";
+            switch (day % 10) {
+                case 1: return "st";
+                case 2: return "nd";
+                case 3: return "rd";
+                default: return "th";
+            }
         };
 
-        // --- Start Date ---
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        // Format date
         const [year, month, day] = date.split("-").map(Number);
         const suffix = getOrdinalSuffix(day);
-        const monthNames = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
-        ];
         const monthName = monthNames[month - 1];
 
-        // --- End Date ---
+        // Format end date if exists
         let endDateString = "";
-        if (typeof endDate !== "undefined" && endDate.trim() !== "") {
-        const [eYear, eMonth, eDay] = endDate.split("-").map(Number);
-        if (eDay !== 0 && eYear !== 0) {
-            const eSuffix = getOrdinalSuffix(eDay);
-            const eMonthName = monthNames[eMonth - 1];
-            endDateString = ` - ${eDay}${eSuffix} ${eMonthName} ${eYear}`;
-        } 
-        } else {
-        endDateString = ` `;
+        if (endDate && endDate.trim() !== "") {
+            const [eYear, eMonth, eDay] = endDate.split("-").map(Number);
+            if (eDay && eYear) {
+                const eSuffix = getOrdinalSuffix(eDay);
+                const eMonthName = monthNames[eMonth - 1];
+                endDateString = ` - ${eDay}${eSuffix} ${eMonthName} ${eYear}`;
+            }
         }
 
+        // Format time
         const [hour, minute] = time.split(":").map(Number);
         const period = hour >= 12 ? "PM" : "AM";
         const formattedHour = hour % 12 === 0 ? 12 : hour % 12;
         const formattedTime = `${formattedHour}:${minute.toString().padStart(2, "0")} ${period}`;
 
-        const startLabel = "Date: ";
-        const startDateString = `${day}${suffix} ${monthName} ${year}`;
-        const timeLabel = "Time: ";
-        const timeString = formattedTime;
+        // Draw details at bottom
+        doc.font('Times-Bold').fontSize(14);
 
-        doc.font('Times-Bold').fontSize(textSize);
+        // Date
+        const dateText = `Date: ${day}${suffix} ${monthName} ${year}${endDateString}`;
+        const dateWidth = doc.widthOfString(dateText);
+        const dateX = (doc.page.width - dateWidth) / 2;
+        doc.y = detailsY;
+        doc.fillColor([181, 13, 14]).text("Date: ", dateX, doc.y, { continued: true })
+           .fillColor([36, 27, 156]).text(`${day}`, { continued: true })
+           .fillColor([36, 27, 156]).text(suffix, { continued: true, superscript: true })
+           .text(` ${monthName} ${year}${endDateString}`);
 
-        const dateText = `${startLabel}${startDateString}${endDateString}`;
-        const startDateWidth = doc.widthOfString(dateText);
-        const startDateX = (doc.page.width - startDateWidth) / 2;
-
-        doc.fillColor([181, 13, 14])
-        .text(startLabel, startDateX, doc.y, { continued: true })
-        .fillColor([36, 27, 156])
-        .text(`${day}`, { continued: true }) // Day without suffix
-        .fillColor([36, 27, 156])
-        .text(suffix, { continued: true, superscript: true }) // Superscript suffix
-        .text(` ${monthName} ${year}`, { continued: true });
-
-        if (endDateString) {
-        doc.fillColor([36, 27, 156])
-            .text(endDateString);
-        } else {
-        doc.moveDown(0.5); 
-        }
-
-        doc.font('Times-Bold').fontSize(textSize);
-
-        const timeText = `${timeLabel}${timeString}`;
+        // Time
+        doc.moveDown(0.5);
+        const timeText = `Time: ${formattedTime}`;
         const timeWidth = doc.widthOfString(timeText);
         const timeX = (doc.page.width - timeWidth) / 2;
+        doc.fillColor([181, 13, 14]).text("Time: ", timeX, doc.y, { continued: true })
+           .fillColor([36, 27, 156]).text(formattedTime);
 
-        // Render time text in center
-        doc.fillColor([181, 13, 14])
-        .text(timeLabel, timeX, doc.y, { continued: true })
-        .fillColor([36, 27, 156])
-        .text(timeString);
+        // Venue
+        doc.moveDown(0.5);
+        const venueText = `Venue: ${venue}${organization ? ', Academic Block-' : ''}${organization || ''}`;
+        const venueWidth = doc.widthOfString(venueText);
+        const venueX = (doc.page.width - venueWidth) / 2;
+        doc.fillColor([181, 13, 14]).text("Venue: ", venueX, doc.y, { continued: true })
+           .fillColor([36, 27, 156]).text(`${venue}${organization ? ', Academic Block-' : ''}${organization || ''}`);
 
-        // --- Venue ---
-        const venueLabel = "Venue: ";
-        const venueValueStr = `${venue}${organization ? ', Academic Block-' : '' } ${organization ? organization : ''}`; // Ensure 'venue' and 'organization' are defined in req.body
-
-        doc.font('Times-Bold').fontSize(textSize);
-        const venueLabelWidth = doc.widthOfString(venueLabel);
-        const venueValueWidth = doc.widthOfString(venueValueStr);
-
-        // Total width for the venue line
-        const totalVenueWidth = venueLabelWidth + venueValueWidth;
-
-        // Compute starting x-coordinate to center the venue line
-        const venueLineX = (doc.page.width - totalVenueWidth) / 2;
-
-        // Render venue line
-        doc.fillColor([181, 13, 14])
-        .text(venueLabel, venueLineX, doc.y, { continued: true });
-        doc.fillColor([36, 27, 156])
-        .text(venueValueStr, { continued: false });
-
-        // Signatory Section 
-        const bottomY = doc.page.height - 107; 
+        // Signatory Section
+        doc.moveDown(2);
+        const bottomY = doc.page.height - 107;
         const colWidth = doc.page.width / 3;
 
         doc.fillColor([36, 27, 156])
-        .font('Times-Bold')
-        .fontSize(14)
-        .text("Smt. Usha Abhaya Srisrimal", colWidth * 0, bottomY, { align: 'center', width: colWidth })
-        .fontSize(12)
-        .text("Secretary", colWidth * 0, bottomY + 20, { align: 'center', width: colWidth });
+           .font('Times-Bold')
+           .fontSize(14)
+           .text("Smt. Usha Abhaya Srisrimal", colWidth * 0, bottomY, { align: 'center', width: colWidth })
+           .fontSize(12)
+           .text("Secretary", colWidth * 0, bottomY + 20, { align: 'center', width: colWidth });
 
         doc.fillColor([36, 27, 156])
-        .font('Times-Bold')
-        .fontSize(14)
-        .text("Dr. Harish L Metha", colWidth * 1, bottomY, { align: 'center', width: colWidth })
-        .fontSize(12)
-        .text("Associate Secretary", colWidth * 1, bottomY + 20, { align: 'center', width: colWidth });
+           .font('Times-Bold')
+           .fontSize(14)
+           .text("Dr. Harish L Metha", colWidth * 1, bottomY, { align: 'center', width: colWidth })
+           .fontSize(12)
+           .text("Associate Secretary", colWidth * 1, bottomY + 20, { align: 'center', width: colWidth });
 
         doc.fillColor([36, 27, 156])
-        .font('Times-Bold')
-        .fontSize(14)
-        .text("Dr. S. Padmavathi", colWidth * 2, bottomY, { align: 'center', width: colWidth })
-        .fontSize(12)
-        .text("Principal", colWidth * 2, bottomY + 20, { align: 'center', width: colWidth });
+           .font('Times-Bold')
+           .fontSize(14)
+           .text("Dr. S. Padmavathi", colWidth * 2, bottomY, { align: 'center', width: colWidth })
+           .fontSize(12)
+           .text("Principal", colWidth * 2, bottomY + 20, { align: 'center', width: colWidth });
 
         // -------------------------------
         // Agenda List Section (Added)

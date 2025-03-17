@@ -6,10 +6,17 @@ import { FaCalendarAlt } from 'react-icons/fa';
 
 export default function CertificateForm() {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const loadStateFromSession = (key, defaultValue) => {
     const savedData = sessionStorage.getItem(key);
-    return savedData ? JSON.parse(savedData) : defaultValue;
+    if (!savedData) return defaultValue;
+    try {
+      return JSON.parse(savedData);
+    } catch (error) {
+      console.warn(`Error parsing session data for ${key}:`, error);
+      return defaultValue;
+    }
   };
 
   const [formData, setFormData] = useState(
@@ -269,61 +276,75 @@ export default function CertificateForm() {
 
   const handleSubmit = async (e, action) => {
     e.preventDefault();
+    setIsLoading(true);
+
     const form = new FormData();
 
     // Append form data
     Object.keys(formData).forEach((key) => {
-      form.append(key, formData[key]);
-    });
-    if (enableAgenda) {
-      agendaList.forEach((item) => form.append('agendaList', item));
-    }
-    titles.forEach((title) => form.append('titles', title));
-    Object.keys(files).forEach((key) => {
-      if (Array.isArray(files[key])) {
-        files[key].forEach((file) => form.append(key, file));
-      } else if (files[key]) {
-        form.append(key, files[key]);
+      if (formData[key] !== null && formData[key] !== undefined) {
+        form.append(key, formData[key]);
       }
     });
+
+    // Append agenda list if enabled
+    if (enableAgenda && agendaList.length > 0) {
+      agendaList.forEach((item) => {
+        if (item) form.append('agendaList', item);
+      });
+    }
+
+    // Append titles
+    if (titles.length > 0) {
+      titles.forEach((title) => {
+        if (title) form.append('titles', title);
+      });
+    }
+
+    // Handle files
+    if (files.clubLogo instanceof File) {
+      form.append('clubLogo', files.clubLogo);
+    }
 
     // Append Chief Guests data
-    const guestsDetails = chiefGuestsData.map(guest => ({
-      salutation: guest.salutation,
-      name: guest.name,
-      designation: guest.designation,
-      additionalText: guest.additionalText
-    }));
-    form.append('chiefGuests', JSON.stringify(guestsDetails));
-    chiefGuestsData.forEach((guest, index) => {
-      if (guest.image) {
-        form.append('chiefGuestImages', guest.image, `${index}_${guest.image.name}`);
-      }
-    });
+    if (chiefGuestsData.length > 0) {
+      const guestsDetails = chiefGuestsData.map(guest => ({
+        salutation: guest.salutation || '',
+        name: guest.name || '',
+        designation: guest.designation || '',
+        additionalText: guest.additionalText || ''
+      }));
+      form.append('chiefGuests', JSON.stringify(guestsDetails));
+
+      // Append chief guest images
+      chiefGuestsData.forEach((guest, index) => {
+        if (guest.image instanceof File) {
+          form.append('chiefGuestImages', guest.image);
+        }
+      });
+    }
 
     // Append Collaborators data
-    form.append('collaborators', JSON.stringify(collaboratorsData));
-    collaboratorsData.forEach((collaborator, index) => {
-      if (collaborator.logo) {
-        form.append('collaboratorLogos', collaborator.logo, `${index}_${collaborator.logo.name}`);
-      }
-    });
+    if (collaboratorsData.length > 0) {
+      form.append('collaborators', JSON.stringify(collaboratorsData.map(c => ({
+        name: c.name || ''
+      }))));
+
+      // Append collaborator logos
+      collaboratorsData.forEach((collaborator, index) => {
+        if (collaborator.logo instanceof File) {
+          form.append('collaboratorLogos', collaborator.logo);
+        }
+      });
+    }
 
     // Append additional image and description
-    if (files.additionalImage) {
+    if (files.additionalImage instanceof File) {
       form.append('additionalImage', files.additionalImage);
     }
-    form.append('additionalImageDescription', additionalImageDescription);
-
-    console.log('Form Data:', {
-      ...formData,
-      agendaList,
-      titles,
-      files,
-      chiefGuests: guestsDetails,
-      collaborators: collaboratorsData,
-      additionalImageDescription
-    });
+    if (additionalImageDescription) {
+      form.append('additionalImageDescription', additionalImageDescription);
+    }
 
     try {
       const response = await fetch('https://appsail-50025424145.development.catalystappsail.in/certificate/generate-certificate', {
@@ -340,15 +361,27 @@ export default function CertificateForm() {
         }
       } else {
         console.error('Failed to generate certificate');
+        alert('Failed to generate invite. Please try again.');
       }
     } catch (error) {
       console.error('Error:', error);
+      alert('An error occurred while generating the invite.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="container">
       <h2 className="text-xl font-bold mb-4">Generate Invite</h2>
+      {isLoading && (
+        <div className="loading-overlay">
+          <div className="loading-popup">
+            <div className="loading-spinner"></div>
+            <p>Generating Invite Preview...</p>
+          </div>
+        </div>
+      )}
       <form onSubmit={(e) => handleSubmit(e, 'preview')} className="space-y-4">
         <div className="space-y-4">
           <label>Number of Chief Guests:</label>
@@ -494,60 +527,64 @@ export default function CertificateForm() {
 
         {/* Department & Course */}
         <div className="flex flex-col space-y-2">
-  <label>Department (UG/PG):*</label>
-  <select name="department" value={formData.department} onChange={handleChange} >
-    <option value="" disabled selected default>Select a department</option>
-    <option value="UG">UG</option>
-    <option value="PG">PG</option>
-    <option value="PG & Research">PG & Research</option>
-  </select>
+          <label>Department (UG/PG):*</label>
+          <select 
+            name="department" 
+            value={formData.department || ''} 
+            onChange={handleChange} 
+          >
+            <option value="">Select a department</option>
+            <option value="UG">UG</option>
+            <option value="PG">PG</option>
+            <option value="PG & Research">PG & Research</option>
+          </select>
 
-  <label>Course:*</label>
-  <select name="course" value={formData.course} onChange={handleChange} >
-    <option value="" disabled selected>Select a course</option>
-    {formData.department === "UG"
-      ? ugCourses.map((course, index) => (
-          <option key={index} value={course.split(" - ").pop()}>{course}</option>
-        ))
-      : formData.department === "PG"
-      ? pgCourses.map((course, index) => (
-          <option key={index} value={course.replace("Department of ", "")}>{course}</option>
-        ))
-      : pgResearchCourses.map((course, index) => (
-          <option key={index} value={course.replace("Department of ", "")}>{course}</option>
-        ))}
-  </select>
-</div>
+          <label>Course:*</label>
+          <select 
+            name="course" 
+            value={formData.course || ''} 
+            onChange={handleChange} 
+          >
+            <option value="">Select a course</option>
+            {formData.department === "UG"
+              ? ugCourses.map((course, index) => (
+                  <option key={index} value={course.split(" - ").pop()}>{course}</option>
+                ))
+              : formData.department === "PG"
+              ? pgCourses.map((course, index) => (
+                  <option key={index} value={course.replace("Department of ", "")}>{course}</option>
+                ))
+              : pgResearchCourses.map((course, index) => (
+                  <option key={index} value={course.replace("Department of ", "")}>{course}</option>
+                ))}
+          </select>
+        </div>
 
+        {/* Event Name Dropdown */}
+        <div className="space-y-2">
+          <label>Event Title:*</label>
+          <select
+            name="eventType"
+            value={formData.eventType || ''}
+            onChange={handleChange}
+            required
+            disabled={formData.eventTitle.trim() !== ""}
+          >
+            <option value="">Select an event type</option>
+            {eventTypes.map((type, index) => (
+              <option key={index} value={type}>{type}</option>
+            ))}
+          </select>
 
-         {/* Event Name Dropdown */}
-         <div className="space-y-2">
-        <label>Event Title:*</label>
-        <select
-          name="eventType"
-          value={formData.eventType}
-          onChange={handleChange}
-          required
-          disabled={formData.eventTitle.trim() !== ""}
-        >
-          <option value="">Select an event type</option>
-          
-          {eventTypes.map((type, index) => (
-            <option key={index} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
-
-        <input
-          type="text"
-          name="eventTitle"
-          placeholder="Event Title*"
-          value={formData.eventTitle}
-          onChange={handleChange}
-          disabled={formData.eventType !== ""}
-        />
-    </div>
+          <input
+            type="text"
+            name="eventTitle"
+            placeholder="Event Title*"
+            value={formData.eventTitle}
+            onChange={handleChange}
+            disabled={formData.eventType !== ""}
+          />
+        </div>
         <input 
           type="text" 
           name="subtitle" 
