@@ -8,24 +8,23 @@ export default function CertificateForm() {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  const loadStateFromSession = (key, defaultValue) => {
-    const savedData = sessionStorage.getItem(key);
+  const loadStateFromStorage = (key, defaultValue) => {
+    const savedData = localStorage.getItem(key);
     if (!savedData) return defaultValue;
     try {
       return JSON.parse(savedData);
     } catch (error) {
-      console.warn(`Error parsing session data for ${key}:`, error);
+      console.warn(`Error parsing storage data for ${key}:`, error);
       return defaultValue;
     }
   };
 
+  // Initialize states with data from localStorage
   const [formData, setFormData] = useState(
-    loadStateFromSession('formData', {
+    loadStateFromStorage('formData', {
       recipientName: '',
       eventTitle: '',
       eventType: '',
-      subtitle: '',
-      additionalImageDescription: '',
       date: '',
       endDate: '',
       time: '',
@@ -37,86 +36,120 @@ export default function CertificateForm() {
     })
   );
 
-  const [files, setFiles] = useState(
-    loadStateFromSession('files', {
-      clubLogo: null,
-    })
-  );
+  const [formErrors, setFormErrors] = useState({});
 
-  const [additionalImageDescription, setAdditionalImageDescription] = useState(
-    loadStateFromSession('additionalImageDescription', '')
-  );
+  const [files, setFiles] = useState({
+    clubLogo: null
+  });
 
   const [enableAgenda, setEnableAgenda] = useState(
-    loadStateFromSession('enableAgenda', false)
+    loadStateFromStorage('enableAgenda', false)
   );
 
   const [agendaList, setAgendaList] = useState(
-    loadStateFromSession('agendaList', [])
+    loadStateFromStorage('agendaList', [])
   );
 
   const [titles, setTitles] = useState(
-    loadStateFromSession('titles', [])
+    loadStateFromStorage('titles', [])
   );
 
   const [numChiefGuests, setNumChiefGuests] = useState(
-    loadStateFromSession('numChiefGuests', 0)
+    loadStateFromStorage('numChiefGuests', 0)
   );
 
   const [chiefGuestsData, setChiefGuestsData] = useState(
-    loadStateFromSession('chiefGuestsData', [])
+    loadStateFromStorage('chiefGuestsData', []).map(guest => ({
+      ...guest,
+      image: null // Reset image to null since we can't store binary data in localStorage
+    }))
   );
 
   const [numCollaborators, setNumCollaborators] = useState(
-    loadStateFromSession('numCollaborators', 0)
+    loadStateFromStorage('numCollaborators', 0)
   );
 
   const [collaboratorsData, setCollaboratorsData] = useState(
-    loadStateFromSession('collaboratorsData', [])
+    loadStateFromStorage('collaboratorsData', []).map(collab => ({
+      ...collab,
+      logo: null // Reset logo to null since we can't store binary data in localStorage
+    }))
   );
 
-  const [previewUrl, setPreviewUrl] = useState(null);
-
-  // Save state to sessionStorage whenever it changes
+  // Save state to localStorage whenever it changes
   useEffect(() => {
-    sessionStorage.setItem('formData', JSON.stringify(formData));
+    localStorage.setItem('formData', JSON.stringify(formData));
   }, [formData]);
 
   useEffect(() => {
-    sessionStorage.setItem('files', JSON.stringify(files));
+    // Don't store files in localStorage
   }, [files]);
 
   useEffect(() => {
-    sessionStorage.setItem('additionalImageDescription', additionalImageDescription);
-  }, [additionalImageDescription]);
-
-  useEffect(() => {
-    sessionStorage.setItem('enableAgenda', enableAgenda);
+    localStorage.setItem('enableAgenda', JSON.stringify(enableAgenda));
   }, [enableAgenda]);
 
   useEffect(() => {
-    sessionStorage.setItem('agendaList', JSON.stringify(agendaList));
+    localStorage.setItem('agendaList', JSON.stringify(agendaList));
   }, [agendaList]);
 
   useEffect(() => {
-    sessionStorage.setItem('titles', JSON.stringify(titles));
+    localStorage.setItem('titles', JSON.stringify(titles));
   }, [titles]);
 
   useEffect(() => {
-    sessionStorage.setItem('numChiefGuests', numChiefGuests);
+    localStorage.setItem('numChiefGuests', JSON.stringify(numChiefGuests));
   }, [numChiefGuests]);
 
   useEffect(() => {
-    sessionStorage.setItem('chiefGuestsData', JSON.stringify(chiefGuestsData));
+    // Store chief guest data without the image property
+    const dataForStorage = chiefGuestsData.map(({ image, ...rest }) => rest);
+    localStorage.setItem('chiefGuestsData', JSON.stringify(dataForStorage));
   }, [chiefGuestsData]);
 
   useEffect(() => {
-    sessionStorage.setItem('numCollaborators', numCollaborators);
+    localStorage.setItem('numCollaborators', JSON.stringify(numCollaborators));
   }, [numCollaborators]);
 
   useEffect(() => {
-    sessionStorage.setItem('collaboratorsData', JSON.stringify(collaboratorsData));
+    // Store collaborator data without the logo property
+    const dataForStorage = collaboratorsData.map(({ logo, ...rest }) => rest);
+    localStorage.setItem('collaboratorsData', JSON.stringify(dataForStorage));
   }, [collaboratorsData]);
+
+  // Add a clear form function
+  const clearForm = () => {
+    localStorage.clear();
+    setFormData({
+      recipientName: '',
+      eventTitle: '',
+      eventType: '',
+      date: '',
+      endDate: '',
+      time: '',
+      venue: '',
+      organization: '',
+      clubName: '',
+      department: '',
+      course: ''
+    });
+    setFiles({ clubLogo: null });
+    setEnableAgenda(false);
+    setAgendaList([]);
+    setTitles([]);
+    setNumChiefGuests(0);
+    setChiefGuestsData([]);
+    setNumCollaborators(0);
+    setCollaboratorsData([]);
+  };
+
+  // Add a button to clear the form
+  const handleClearForm = (e) => {
+    e.preventDefault();
+    if (window.confirm('Are you sure you want to clear all form data?')) {
+      clearForm();
+    }
+  };
 
   // Dropdown options for courses
   const ugCourses = [
@@ -184,10 +217,6 @@ export default function CertificateForm() {
     }));
   };
 
-  const handleAdditionalImageDescriptionChange = (e) => {
-    setAdditionalImageDescription(e.target.value);
-  };
-
   // Chief Guests Handlers
   const handleNumChiefGuestsChange = (e) => {
     const num = parseInt(e.target.value, 10);
@@ -213,8 +242,37 @@ export default function CertificateForm() {
 
   const handleChiefGuestImageChange = (index, file) => {
     const updated = [...chiefGuestsData];
-    updated[index] = { ...updated[index], image: file };
+    updated[index] = { 
+      ...updated[index], 
+      image: file,
+      imagePreview: file ? URL.createObjectURL(file) : null // Add image preview URL
+    };
     setChiefGuestsData(updated);
+  };
+
+  const validateChiefGuestData = () => {
+    let errors = {};
+    let hasErrors = false;
+
+    if (numChiefGuests > 0) {
+      chiefGuestsData.forEach((guest, index) => {
+        if (!guest.name || guest.name.trim() === '') {
+          errors[`name_${index}`] = `Name is required for Chief Guest ${index + 1}`;
+          hasErrors = true;
+        }
+        if (!guest.designation || guest.designation.trim() === '') {
+          errors[`designation_${index}`] = `Designation is required for Chief Guest ${index + 1}`;
+          hasErrors = true;
+        }
+        if (!guest.image) {
+          errors[`image_${index}`] = `Image is required for Chief Guest ${index + 1}`;
+          hasErrors = true;
+        }
+      });
+    }
+
+    setFormErrors(errors);
+    return !hasErrors;
   };
 
   // Collaborators Handlers
@@ -276,6 +334,76 @@ export default function CertificateForm() {
 
   const handleSubmit = async (e, action) => {
     e.preventDefault();
+
+    // Clear previous errors
+    setFormErrors({});
+
+    let errors = {};
+    let hasErrors = false;
+
+    // Validate all required fields
+    if (!formData.department) {
+      errors.department = 'Department is required';
+      hasErrors = true;
+    }
+    if (!formData.course) {
+      errors.course = 'Course is required';
+      hasErrors = true;
+    }
+    if (!formData.venue) {
+      errors.venue = 'Venue is required';
+      hasErrors = true;
+    }
+    if (!formData.organization) {
+      errors.organization = 'Academic Block is required';
+      hasErrors = true;
+    }
+    if (!formData.date) {
+      errors.date = 'Start Date is required';
+      hasErrors = true;
+    }
+    if (!formData.time) {
+      errors.time = 'Time is required';
+      hasErrors = true;
+    }
+    if (!formData.clubName) {
+      errors.clubName = 'Club Name is required';
+      hasErrors = true;
+    }
+    if (!formData.eventType && !formData.eventTitle) {
+      errors.eventType = 'Either Event Type or Event Title is required';
+      hasErrors = true;
+    }
+
+    // Validate collaborators
+    if (numCollaborators > 0) {
+      collaboratorsData.forEach((collab, index) => {
+        if (!collab.name) {
+          errors[`collaborator_name_${index}`] = `Name is required for Collaborator ${index + 1}`;
+          hasErrors = true;
+        }
+        if (!collab.logo) {
+          errors[`collaborator_logo_${index}`] = `Logo is required for Collaborator ${index + 1}`;
+          hasErrors = true;
+        }
+      });
+    }
+
+    // Validate chief guest data
+    if (!validateChiefGuestData()) {
+      hasErrors = true;
+    }
+
+    if (hasErrors) {
+      setFormErrors(errors);
+      // Scroll to the first error
+      const firstErrorElement = document.querySelector('.border-red-500');
+      if (firstErrorElement) {
+        firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      return;
+    }
+
     setIsLoading(true);
 
     const form = new FormData();
@@ -283,7 +411,7 @@ export default function CertificateForm() {
     // Append form data
     Object.keys(formData).forEach((key) => {
       if (formData[key] !== null && formData[key] !== undefined) {
-        form.append(key, formData[key]);
+      form.append(key, formData[key]);
       }
     });
 
@@ -308,20 +436,20 @@ export default function CertificateForm() {
 
     // Append Chief Guests data
     if (chiefGuestsData.length > 0) {
-      const guestsDetails = chiefGuestsData.map(guest => ({
+    const guestsDetails = chiefGuestsData.map(guest => ({
         salutation: guest.salutation || '',
         name: guest.name || '',
         designation: guest.designation || '',
         additionalText: guest.additionalText || ''
-      }));
-      form.append('chiefGuests', JSON.stringify(guestsDetails));
+    }));
+    form.append('chiefGuests', JSON.stringify(guestsDetails));
 
       // Append chief guest images
-      chiefGuestsData.forEach((guest, index) => {
+    chiefGuestsData.forEach((guest, index) => {
         if (guest.image instanceof File) {
           form.append('chiefGuestImages', guest.image);
-        }
-      });
+      }
+    });
     }
 
     // Append Collaborators data
@@ -331,19 +459,11 @@ export default function CertificateForm() {
       }))));
 
       // Append collaborator logos
-      collaboratorsData.forEach((collaborator, index) => {
+    collaboratorsData.forEach((collaborator, index) => {
         if (collaborator.logo instanceof File) {
           form.append('collaboratorLogos', collaborator.logo);
         }
       });
-    }
-
-    // Append additional image and description
-    if (files.additionalImage instanceof File) {
-      form.append('additionalImage', files.additionalImage);
-    }
-    if (additionalImageDescription) {
-      form.append('additionalImageDescription', additionalImageDescription);
     }
 
     try {
@@ -374,6 +494,20 @@ export default function CertificateForm() {
   return (
     <div className="container">
       <h2 className="text-xl font-bold mb-4">Generate Invite</h2>
+      <div className="flex justify-end mb-4 space-x-4">
+        <button
+          onClick={() => navigate('/celebration-form')}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Switch to Celebration Form
+        </button>
+        <button
+          onClick={handleClearForm}
+          className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          Clear Form
+        </button>
+      </div>
       {isLoading && (
         <div className="loading-overlay">
           <div className="loading-popup">
@@ -384,11 +518,13 @@ export default function CertificateForm() {
       )}
       <form onSubmit={(e) => handleSubmit(e, 'preview')} className="space-y-4">
         <div className="space-y-4">
-          <label>Number of Chief Guests:</label>
+          <label>Number of Chief Guests:*</label>
           <select 
             value={numChiefGuests} 
             onChange={handleNumChiefGuestsChange} 
+            required
           >
+            <option value="">Select number of chief guests</option>
             <option value={0}>0</option>
             <option value={1}>1</option>
             <option value={2}>2</option>
@@ -405,40 +541,67 @@ export default function CertificateForm() {
                 <option value="Mrs.">Mrs.</option>
                 <option value="Dr.">Dr.</option>
               </select>
+              <div>
               <input
                 type="text"
-                placeholder="Name"
+                  placeholder="Name*"
                 value={guest.name}
                 onChange={(e) => handleChiefGuestChange(index, 'name', e.target.value)}
+                  className={formErrors[`name_${index}`] ? 'border-red-500' : ''}
               />
+                {formErrors[`name_${index}`] && (
+                  <p className="text-red-500 text-sm">{formErrors[`name_${index}`]}</p>
+                )}
+              </div>
+              <div>
               <input
                 type="text"
-                placeholder="Designation"
+                  placeholder="Designation*"
                 value={guest.designation}
                 onChange={(e) => handleChiefGuestChange(index, 'designation', e.target.value)}
+                  className={formErrors[`designation_${index}`] ? 'border-red-500' : ''}
               />
+                {formErrors[`designation_${index}`] && (
+                  <p className="text-red-500 text-sm">{formErrors[`designation_${index}`]}</p>
+                )}
+              </div>
               <input
                 type="text"
                 placeholder="Additional Text"
                 value={guest.additionalText}
                 onChange={(e) => handleChiefGuestChange(index, 'additionalText', e.target.value)}
               />
+              <div>
               <input
                 type="file"
                 name="chiefGuestImages"
                 onChange={(e) => handleChiefGuestImageChange(index, e.target.files[0])}
-              />
+                  className={formErrors[`image_${index}`] ? 'border-red-500' : ''}
+                />
+                {guest.imagePreview && (
+                  <img 
+                    src={guest.imagePreview} 
+                    alt={`Chief Guest ${index + 1} preview`} 
+                    style={{ width: '100px', height: '100px', objectFit: 'cover', marginTop: '8px' }}
+                  />
+                )}
+                {formErrors[`image_${index}`] && (
+                  <p className="text-red-500 text-sm">{formErrors[`image_${index}`]}</p>
+                )}
+              </div>
             </div>
           ))}
         </div>
 
         {/* Collaborators Section */}
         <div className="space-y-4">
-          <label>Number of Collaborators (Max 2):</label>
+          <label>Number of Collaborators (Max 2):*</label>
           <select 
             value={numCollaborators} 
             onChange={handleNumCollaboratorsChange} 
+            required
           >
+            <option value="">Select number of collaborators</option>
             <option value={0}>0</option>
             <option value={1}>1</option>
             <option value={2}>2</option>
@@ -448,44 +611,48 @@ export default function CertificateForm() {
               <h3>Collaborator {index + 1}</h3>
               <input
                 type="text"
-                placeholder="Name"
+                placeholder="Name*"
                 value={collab.name}
                 onChange={(e) => handleCollaboratorChange(index, e.target.value)}
+                required
+                className={formErrors[`collaborator_name_${index}`] ? 'border-red-500' : ''}
               />
+              {formErrors[`collaborator_name_${index}`] && (
+                <p className="text-red-500 text-sm">{formErrors[`collaborator_name_${index}`]}</p>
+              )}
               <input
                 type="file"
                 name="collaboratorLogos"
                 onChange={(e) => handleCollaboratorLogoChange(index, e.target.files[0])}
+                required
+                className={formErrors[`collaborator_logo_${index}`] ? 'border-red-500' : ''}
               />
+              {formErrors[`collaborator_logo_${index}`] && (
+                <p className="text-red-500 text-sm">{formErrors[`collaborator_logo_${index}`]}</p>
+              )}
             </div>
           ))}
         </div>
         
         {/* Club & Club Logo */}
         <div className="flex items-center space-x-2">
-        <label htmlFor="Venue" style={{ marginBottom: '4px'}}>Club Name:</label>
+          <label htmlFor="clubName" style={{ marginBottom: '4px'}}>Club Name:*</label>
           <input 
             type="text" 
+            id="clubName"
             name="clubName" 
-            placeholder="Club Name (Optional)" 
+            placeholder="Club Name" 
             value={formData.clubName}
             onChange={handleChange} 
+            required
+            className={formErrors.clubName ? 'border-red-500' : ''}
           />
-          <label>Club Logo:</label>
+          <label htmlFor="clubLogo">Club Logo:</label>
           <input 
             type="file" 
+            id="clubLogo"
             name="clubLogo" 
             onChange={handleFileChange} 
-          />
-        </div>
-
-        {/* Additional Image and Description */}
-        <div className="flex items-center space-x-2">
-          <input
-            type="text"
-            placeholder="Description for the Festival slogans"
-            value={additionalImageDescription}
-            onChange={handleAdditionalImageDescriptionChange}
           />
         </div>
 
@@ -511,6 +678,7 @@ export default function CertificateForm() {
                   placeholder={`Agenda ${index + 1}`}
                   value={agenda}
                   onChange={(e) => handleAgendaChange(index, e.target.value)}
+                  className={formErrors[`agenda_${index}`] ? 'border-red-500' : ''}
                 />
                 <button type="button" onClick={() => handleRemoveAgenda(index)}>
                   Remove
@@ -527,70 +695,80 @@ export default function CertificateForm() {
 
         {/* Department & Course */}
         <div className="flex flex-col space-y-2">
-          <label>Department (UG/PG):*</label>
+  <label>Department (UG/PG):*</label>
           <select 
             name="department" 
             value={formData.department || ''} 
-            onChange={handleChange} 
+            onChange={handleChange}
+            required
+            className={formErrors.department ? 'border-red-500' : ''}
           >
             <option value="">Select a department</option>
-            <option value="UG">UG</option>
-            <option value="PG">PG</option>
-            <option value="PG & Research">PG & Research</option>
-          </select>
+    <option value="UG">UG</option>
+    <option value="PG">PG</option>
+    <option value="PG & Research">PG & Research</option>
+  </select>
+  {formErrors.department && (
+    <p className="text-red-500 text-sm">{formErrors.department}</p>
+  )}
 
-          <label>Course:*</label>
+  <label>Course:*</label>
           <select 
             name="course" 
             value={formData.course || ''} 
-            onChange={handleChange} 
-          >
-            <option value="">Select a course</option>
-            {formData.department === "UG"
-              ? ugCourses.map((course, index) => (
-                  <option key={index} value={course.split(" - ").pop()}>{course}</option>
-                ))
-              : formData.department === "PG"
-              ? pgCourses.map((course, index) => (
-                  <option key={index} value={course.replace("Department of ", "")}>{course}</option>
-                ))
-              : pgResearchCourses.map((course, index) => (
-                  <option key={index} value={course.replace("Department of ", "")}>{course}</option>
-                ))}
-          </select>
-        </div>
-
-        {/* Event Name Dropdown */}
-        <div className="space-y-2">
-          <label>Event Title:*</label>
-          <select
-            name="eventType"
-            value={formData.eventType || ''}
             onChange={handleChange}
             required
-            disabled={formData.eventTitle.trim() !== ""}
+            className={formErrors.course ? 'border-red-500' : ''}
           >
-            <option value="">Select an event type</option>
-            {eventTypes.map((type, index) => (
-              <option key={index} value={type}>{type}</option>
-            ))}
-          </select>
+            <option value="">Select a course</option>
+    {formData.department === "UG"
+      ? ugCourses.map((course, index) => (
+          <option key={index} value={course.split(" - ").pop()}>{course}</option>
+        ))
+      : formData.department === "PG"
+      ? pgCourses.map((course, index) => (
+          <option key={index} value={course.replace("Department of ", "")}>{course}</option>
+        ))
+      : pgResearchCourses.map((course, index) => (
+          <option key={index} value={course.replace("Department of ", "")}>{course}</option>
+        ))}
+  </select>
+  {formErrors.course && (
+    <p className="text-red-500 text-sm">{formErrors.course}</p>
+  )}
+</div>
 
-          <input
-            type="text"
-            name="eventTitle"
-            placeholder="Event Title*"
-            value={formData.eventTitle}
-            onChange={handleChange}
-            disabled={formData.eventType !== ""}
-          />
-        </div>
-        <input 
-          type="text" 
-          name="subtitle" 
-          placeholder="Subtitle" 
-          onChange={handleChange} 
+         {/* Event Name Dropdown */}
+         <div className="space-y-2">
+        <label>Event Title:*</label>
+        <select
+          name="eventType"
+            value={formData.eventType || ''}
+          onChange={handleChange}
+          required
+          disabled={formData.eventTitle.trim() !== ""}
+            className={formErrors.eventType ? 'border-red-500' : ''}
+        >
+          <option value="">Select an event type</option>
+          {eventTypes.map((type, index) => (
+                <option key={index} value={type}>{type}</option>
+          ))}
+        </select>
+
+        <input
+          type="text"
+          name="eventTitle"
+          placeholder="Event Title*"
+          value={formData.eventTitle}
+          onChange={handleChange}
+          disabled={formData.eventType !== ""}
+            className={formErrors.eventType ? 'border-red-500' : ''}
         />
+          {formErrors.eventType && (
+            <p className="text-red-500 text-sm">{formErrors.eventType}</p>
+          )}
+    </div>
+
         {/* Titles Section */}
         <div className="space-y-4" style={{marginBottom:'1%'}}>
           <label>Titles (up to 3):&nbsp;&nbsp;&nbsp;&nbsp;</label>
@@ -706,15 +884,28 @@ export default function CertificateForm() {
           value={formData.venue}
           onChange={handleChange} 
           required 
+          className={formErrors.venue ? 'border-red-500' : ''}
         />
+        {formErrors.venue && (
+          <p className="text-red-500 text-sm">{formErrors.venue}</p>
+        )}
         
-        <label htmlFor="Venue" style={{ marginBottom: '4px'}}>Academic Block:*</label>
-       <select name="organization" value={formData.organization} onChange={handleChange} >
-        <option value="" disabled>Select Academic Block</option>
+        <label htmlFor="organization" style={{ marginBottom: '4px'}}>Academic Block:*</label>
+       <select 
+         name="organization" 
+         value={formData.organization} 
+         onChange={handleChange}
+         required
+         className={formErrors.organization ? 'border-red-500' : ''}
+       >
+        <option value="">Select Academic Block</option>
         <option value="I">I</option>
         <option value="II">II</option>
         <option value="III">III</option>
       </select>
+      {formErrors.organization && (
+        <p className="text-red-500 text-sm">{formErrors.organization}</p>
+      )}
 
       <button type="submit">
           Preview Invite

@@ -41,7 +41,7 @@ const generateCertificate = (req, res) => {
         // Parse chiefGuests JSON string into an array of objects.
         let chiefGuestsArray = [];
         try {
-            chiefGuestsArray = JSON.parse(chiefGuests);
+            chiefGuestsArray = chiefGuests ? JSON.parse(chiefGuests) : [];
         } catch (err) {
             console.error("Error parsing chiefGuests JSON", err);
             chiefGuestsArray = [];
@@ -49,7 +49,7 @@ const generateCertificate = (req, res) => {
 
         let collaboratorsArray = [];
         try {
-            collaboratorsArray = JSON.parse(req.body.collaborators);
+            collaboratorsArray = req.body.collaborators ? JSON.parse(req.body.collaborators) : [];
         } catch (err) {
             console.error("Error parsing collaborators JSON", err);
             collaboratorsArray = [];
@@ -298,12 +298,12 @@ const generateCertificate = (req, res) => {
 
         // Function to get ordinal suffix
         const getOrdinalSuffix = (day) => {
-            if (day >= 11 && day <= 13) return "th";
+            if (day >= 11 && day <= 13) return { text: "th", superscript: true };
             switch (day % 10) {
-                case 1: return "st";
-                case 2: return "nd";
-                case 3: return "rd";
-                default: return "th";
+                case 1: return { text: "st", superscript: true };
+                case 2: return { text: "nd", superscript: true };
+                case 3: return { text: "rd", superscript: true };
+                default: return { text: "th", superscript: true };
             }
         };
 
@@ -401,15 +401,10 @@ const generateCertificate = (req, res) => {
             }
             if (agendaArray.length > 0) {
                 doc.font('Times-Bold')
-                .fontSize(18)
-                .fillColor([48,57,77])
-                .text("Agenda: ", doc.page.margins.left, doc.y, { continued: true });
-                doc.fillColor([48,57,77])
-                .text(startDateString, { continued: true });
-                // doc.fontSize(18 - 6)
-                // .text(suffix, { baseline: "sup", continued: true });
-                // doc.fontSize(18)
-                // .text(` ${remainingDateString}`);
+                   .fontSize(18)
+                   .fillColor([48,57,77])
+                   .text("Agenda:", doc.page.margins.left, doc.y);
+                
                 doc.moveDown(2);
                 doc.font('Times-Bold').fontSize(18).fillColor([48,57,77]);
                 agendaArray.forEach((item, index) => {

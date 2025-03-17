@@ -5,6 +5,10 @@ const certificateRoutes = require('./Routes/Certificate_route');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from certificates directory
+app.use('/certificates', express.static('certificates'));
 
 app.get('/', (req, res) => {
     res.send('🚀 Server is running successfully on Vercel!');
