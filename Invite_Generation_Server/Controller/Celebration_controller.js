@@ -98,19 +98,21 @@ const generateCelebration = (req, res) => {
         // Add event image if provided
         if (eventImage?.[0]?.path) {
             doc.moveDown(0.5);
-            const imgWidth = 200;
-            const imgHeight = 150;
-            const imgX = (doc.page.width - imgWidth) / 2;
+            const imgWidth = 250;  // Match college logo width
+            const imgHeight = 80;   // Match college logo height
+            const imgX = (doc.page.width - imgWidth) / 2;  // Center horizontally
             doc.image(eventImage[0].path, imgX, doc.y, { 
                 width: imgWidth,
                 height: imgHeight,
-                fit: [imgWidth, imgHeight]
+                fit: [imgWidth, imgHeight],
+                align: 'center'
             });
-            doc.moveDown(8); // Adjust spacing after image
+            doc.moveDown(1); // Reduced spacing after image for better layout
         }
 
         // Add event slogan
         if (eventSlogan) {
+            doc.moveDown(0.3);  // Match spacing with title and tagline
             doc.fillColor([36, 27, 156])
                .font('Times-Italic')
                .fontSize(16)
@@ -136,12 +138,12 @@ const generateCelebration = (req, res) => {
 
         // Function to get ordinal suffix
         const getOrdinalSuffix = (day) => {
-            if (day >= 11 && day <= 13) return { text: "th", superscript: true };
+            if (day >= 11 && day <= 13) return "th";
             switch (day % 10) {
-                case 1: return { text: "st", superscript: true };
-                case 2: return { text: "nd", superscript: true };
-                case 3: return { text: "rd", superscript: true };
-                default: return { text: "th", superscript: true };
+                case 1: return "st";
+                case 2: return "nd";
+                case 3: return "rd";
+                default: return "th";
             }
         };
 
@@ -154,10 +156,39 @@ const generateCelebration = (req, res) => {
         const dateWidth = doc.widthOfString(dateText);
         const dateX = (doc.page.width - dateWidth) / 2;
         doc.y = detailsY;
-        doc.fillColor([181, 13, 14]).text("Date: ", dateX, doc.y, { continued: true })
-           .fillColor([36, 27, 156]).text(`${day}`, { continued: true })
-           .fillColor([36, 27, 156]).text(suffix.text, { continued: true, superscript: true })
-           .text(` ${monthNames[month - 1]} ${year}`);
+        doc.fillColor([181, 13, 14])
+           .text("Date: ", dateX, doc.y, { continued: true })
+           .fillColor([36, 27, 156])
+           .fontSize(14)
+           .text(`${day}`, { continued: true });
+
+        // Add ordinal suffix in superscript
+        doc.fontSize(10)
+           .text(suffix, { continued: true, rise: 4 });
+
+        // Continue with month and year
+        doc.fontSize(14)
+           .text(` ${monthName} ${year}`, { continued: endDateString !== "" });
+
+        // Add end date if exists
+        if (endDateString !== "") {
+            const [eYear, eMonth, eDay] = endDate.split("-").map(Number);
+            const eSuffix = getOrdinalSuffix(eDay);
+            const eMonthName = monthNames[eMonth - 1];
+            
+            doc.text(" - ", { continued: true })
+               .text(`${eDay}`, { continued: true });
+
+            // Add end date ordinal suffix in superscript
+            doc.fontSize(10)
+               .text(eSuffix, { continued: true, rise: 4 });
+
+            // Continue with month and year
+            doc.fontSize(14)
+               .text(` ${eMonthName} ${eYear}`);
+        } else {
+            doc.text("");
+        }
 
         // Time
         doc.moveDown(0.5);

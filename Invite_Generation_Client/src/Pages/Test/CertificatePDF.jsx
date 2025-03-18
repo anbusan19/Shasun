@@ -28,14 +28,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   logo: {
-    width: 80,
+    width: 60,
     height: 80,
-    marginHorizontal: 10,
+    marginHorizontal: 5,
   },
   collegeLogo: {
-    width: 275,
+    width: 200,
     height: 80,
-    marginHorizontal: 10,
+    marginHorizontal: 5,
   },
   textCenter: {
     textAlign: 'center',
@@ -171,7 +171,8 @@ const CertificatePDF = ({
         {/* Date, Time, and Venue Section */}
         <View style={styles.dateTimeSection}>
           <Text style={[styles.subtitle, styles.textCenter]}>
-            Date: {date} {endDate && `- ${endDate}`}
+            Date: {new Date(date).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} 
+            {endDate && ` - ${new Date(endDate).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}`}
           </Text>
           <Text style={[styles.subtitle, styles.textCenter]}>Time: {time}</Text>
         </View>
