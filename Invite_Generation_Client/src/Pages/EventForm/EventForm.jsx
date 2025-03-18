@@ -467,7 +467,7 @@ export default function CertificateForm() {
     }
 
     try {
-      const response = await fetch('https://appsail-50025424145.development.catalystappsail.in/certificate/generate-certificate', {
+      const response = await fetch('https://appsail-50025424145.development.catalystappsail.in//certificate/generate-certificate', {
         method: 'POST',
         body: form
       });

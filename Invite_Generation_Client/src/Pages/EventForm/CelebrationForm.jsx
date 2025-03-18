@@ -107,7 +107,7 @@ export default function CelebrationForm() {
     }
 
     try {
-      const response = await fetch('https://appsail-50025424145.development.catalystappsail.in/certificate/generate-celebration', {
+      const response = await fetch('https://appsail-50025424145.development.catalystappsail.in//certificate/generate-celebration', {
         method: 'POST',
         body: form
       });
