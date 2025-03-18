@@ -103,11 +103,11 @@ const generateCertificate = (req, res) => {
         }
         
         if (collaboratorLogos) {
-            const rightLogosWidth = 60;
+            const rightLogosWidth = 70;
             collaboratorLogos.forEach((logo, index) => {
                 if (logo?.path) {
-                    const posX = doc.page.width - 60 - (rightLogosWidth * (index + 1)) - (10 * index);
-                    doc.image(logo.path, posX, logoY, { width: rightLogosWidth, height: 60 });
+                    const posX = doc.page.width - 70 - (rightLogosWidth * (index + 1)) - (10 * index);
+                    doc.image(logo.path, posX, logoY, { width: rightLogosWidth, height: 70 });
                 }
             });
         }
