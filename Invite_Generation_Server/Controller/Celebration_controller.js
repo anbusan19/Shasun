@@ -125,12 +125,30 @@ const generateCelebration = (req, res) => {
             doc.moveDown(0.4);
             doc.fillColor([181, 13, 14])
                .font('Times-BoldItalic')
-               .fontSize(16)
-               .text(`"${eventSlogan}"`, { 
-                   align: 'center',
-                   width: doc.page.width - 100, // Increase width for more content per line
-                   lineBreak: true
-               });
+               .fontSize(18);
+
+            // Split slogan into three parts if it's long enough
+            const words = eventSlogan.split(' ');
+            const totalWords = words.length;
+            let line1, line2, line3;
+
+            if (totalWords <= 4) {
+                // If very short, show in one line
+                doc.text(`"${eventSlogan}"`, { align: 'center' });
+            } else {
+                // Split into roughly equal parts
+                const wordsPerLine = Math.ceil(totalWords / 3);
+                line1 = words.slice(0, wordsPerLine).join(' ');
+                line2 = words.slice(wordsPerLine, wordsPerLine * 2).join(' ');
+                line3 = words.slice(wordsPerLine * 2).join(' ');
+
+                // Add quotes to first and last line
+                doc.text(`"${line1}`, { align: 'center' });
+                doc.moveDown(0.2);
+                doc.text(line2, { align: 'center' });
+                doc.moveDown(0.2);
+                doc.text(`${line3}"`, { align: 'center' });
+            }
             doc.moveDown(0.5);
         }
 
@@ -139,7 +157,7 @@ const generateCelebration = (req, res) => {
         doc.fillColor([0,128,0])
            .fontSize(16)
            .text('All are Welcome', { align: 'center' });
-        doc.moveDown(2.5); // Add more space before bottom section
+        doc.moveDown(3); // Add more space before bottom section
 
         // Format date and time
         const [year, month, day] = date.split("-");
