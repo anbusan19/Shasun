@@ -1,26 +1,35 @@
 import { useState, useEffect } from 'react';
 import './EventForm.css';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FaClock } from "react-icons/fa";
 import { FaCalendarAlt } from 'react-icons/fa';
 
 export default function CelebrationForm() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
   const [formData, setFormData] = useState({
-      eventTitle: '',
+    eventTitle: '',
     eventTagline: '',
     eventSlogan: '',
-      date: '',
-      time: '',
-      venue: '',
-    organization: ''
+    date: '',
+    time: '',
+    venue: '',
+    organization: '',
+    clubName: '',
+    collaborator: ''
   });
 
   const [eventImage, setEventImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
+
+  // Load form data if passed from preview
+  useEffect(() => {
+    if (location.state?.formData) {
+      setFormData(location.state.formData);
+    }
+  }, [location.state]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -30,7 +39,6 @@ export default function CelebrationForm() {
     const file = e.target.files[0];
     if (file) {
       setEventImage(file);
-      setImagePreview(URL.createObjectURL(file));
     }
   };
 
@@ -44,10 +52,11 @@ export default function CelebrationForm() {
         date: '',
         time: '',
         venue: '',
-        organization: ''
+        organization: '',
+        clubName: '',
+        collaborator: ''
       });
       setEventImage(null);
-      setImagePreview(null);
     }
   };
 
@@ -79,6 +88,10 @@ export default function CelebrationForm() {
       errors.venue = 'Venue is required';
       hasErrors = true;
     }
+    if (!formData.clubName) {
+      errors.clubName = 'Club Name is required';
+      hasErrors = true;
+    }
     if (!eventImage) {
       errors.eventImage = 'Event Image is required';
       hasErrors = true;
@@ -98,7 +111,7 @@ export default function CelebrationForm() {
     const form = new FormData();
     Object.keys(formData).forEach((key) => {
       if (formData[key]) {
-      form.append(key, formData[key]);
+        form.append(key, formData[key]);
       }
     });
 
@@ -107,7 +120,7 @@ export default function CelebrationForm() {
     }
 
     try {
-      const response = await fetch('https://appsail-50025424145.development.catalystappsail.in//certificate/generate-celebration', {
+      const response = await fetch('https://appsail-50025424145.development.catalystappsail.in/certificate/generate-celebration', {
         method: 'POST',
         body: form
       });
@@ -115,7 +128,13 @@ export default function CelebrationForm() {
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-          navigate('/preview', { state: { pdfUrl: url } });
+        navigate('/preview', { 
+          state: { 
+            pdfUrl: url,
+            formType: 'celebration',
+            formData: formData
+          } 
+        });
       } else {
         console.error('Failed to generate celebration invite');
         alert('Failed to generate celebration invite. Please try again.');
@@ -156,16 +175,47 @@ export default function CelebrationForm() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Club Name */}
+        <div className="space-y-2">
+          <label htmlFor="clubName">Club Name:*</label>
+          <input 
+            type="text" 
+            id="clubName"
+            name="clubName"
+            value={formData.clubName}
+            onChange={handleChange} 
+            placeholder="Enter club name"
+            className={formErrors.clubName ? 'border-red-500' : ''}
+            required
+          />
+          {formErrors.clubName && (
+            <p className="text-red-500 text-sm">{formErrors.clubName}</p>
+          )}
+        </div>
+
+        {/* Collaborator */}
+        <div className="space-y-2">
+          <label htmlFor="collaborator">Collaborator:</label>
+          <input 
+            type="text" 
+            id="collaborator"
+            name="collaborator"
+            value={formData.collaborator}
+            onChange={handleChange} 
+            placeholder="Enter collaborator name (if any)"
+          />
+        </div>
+
         {/* Event Title */}
         <div className="space-y-2">
-          <label htmlFor="eventTitle">Event Title:*</label>
+          <label htmlFor="eventTitle">Event Name:*</label>
           <input 
             type="text" 
             id="eventTitle"
             name="eventTitle"
             value={formData.eventTitle}
             onChange={handleChange} 
-            placeholder="Enter event title"
+            placeholder="Enter event Name"
             className={formErrors.eventTitle ? 'border-red-500' : ''}
             required
           />
@@ -176,14 +226,14 @@ export default function CelebrationForm() {
 
         {/* Event Tagline */}
           <div className="space-y-2">
-          <label htmlFor="eventTagline">Event Tagline:*</label>
+          <label htmlFor="eventTitle">Event Title:*</label>
                 <input
                   type="text"
             id="eventTagline"
             name="eventTagline"
             value={formData.eventTagline}
             onChange={handleChange}
-            placeholder="Enter event tagline"
+            placeholder="Enter event title"
             className={formErrors.eventTagline ? 'border-red-500' : ''}
             required
           />
@@ -204,13 +254,6 @@ export default function CelebrationForm() {
             className={formErrors.eventImage ? 'border-red-500' : ''}
             required
           />
-          {imagePreview && (
-            <img
-              src={imagePreview}
-              alt="Event preview"
-              className="mt-2 max-w-xs rounded"
-            />
-          )}
           {formErrors.eventImage && (
             <p className="text-red-500 text-sm">{formErrors.eventImage}</p>
           )}
@@ -260,6 +303,8 @@ export default function CelebrationForm() {
             value={formData.time}
             onChange={handleChange}
                 className={formErrors.time ? 'border-red-500' : ''}
+            min="08:00"
+            max="18:00"
             required
           />
               <FaClock className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400" />

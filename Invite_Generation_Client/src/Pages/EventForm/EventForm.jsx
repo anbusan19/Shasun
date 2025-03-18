@@ -193,11 +193,17 @@ export default function CertificateForm() {
   // Update course when department changes
   useEffect(() => {
     if (formData.department === 'UG') {
-      setFormData(prev => ({ ...prev, course: "" }));
+      if (!formData.course) {
+        setFormData(prev => ({ ...prev, course: "" }));
+      }
     } else if (formData.department === 'PG') {
-      setFormData(prev => ({ ...prev, course: pgCourses[0] }));
+      if (!formData.course) {
+        setFormData(prev => ({ ...prev, course: pgCourses[0] }));
+      }
     } else if (formData.department === 'PG & Research') {
-      setFormData(prev => ({ ...prev, course: pgResearchCourses[0] }));
+      if (!formData.course) {
+        setFormData(prev => ({ ...prev, course: pgResearchCourses[0] }));
+      }
     }
   }, [formData.department]);
 
@@ -244,8 +250,7 @@ export default function CertificateForm() {
     const updated = [...chiefGuestsData];
     updated[index] = { 
       ...updated[index], 
-      image: file,
-      imagePreview: file ? URL.createObjectURL(file) : null // Add image preview URL
+      image: file
     };
     setChiefGuestsData(updated);
   };
@@ -382,10 +387,6 @@ export default function CertificateForm() {
           errors[`collaborator_name_${index}`] = `Name is required for Collaborator ${index + 1}`;
           hasErrors = true;
         }
-        if (!collab.logo) {
-          errors[`collaborator_logo_${index}`] = `Logo is required for Collaborator ${index + 1}`;
-          hasErrors = true;
-        }
       });
     }
 
@@ -467,7 +468,7 @@ export default function CertificateForm() {
     }
 
     try {
-      const response = await fetch('https://appsail-50025424145.development.catalystappsail.in//certificate/generate-certificate', {
+      const response = await fetch('https://appsail-50025424145.development.catalystappsail.in/certificate/generate-certificate', {
         method: 'POST',
         body: form
       });
@@ -576,15 +577,8 @@ export default function CertificateForm() {
                 type="file"
                 name="chiefGuestImages"
                 onChange={(e) => handleChiefGuestImageChange(index, e.target.files[0])}
-                  className={formErrors[`image_${index}`] ? 'border-red-500' : ''}
+                className={formErrors[`image_${index}`] ? 'border-red-500' : ''}
                 />
-                {guest.imagePreview && (
-                  <img 
-                    src={guest.imagePreview} 
-                    alt={`Chief Guest ${index + 1} preview`} 
-                    style={{ width: '100px', height: '100px', objectFit: 'cover', marginTop: '8px' }}
-                  />
-                )}
                 {formErrors[`image_${index}`] && (
                   <p className="text-red-500 text-sm">{formErrors[`image_${index}`]}</p>
                 )}
@@ -624,7 +618,6 @@ export default function CertificateForm() {
                 type="file"
                 name="collaboratorLogos"
                 onChange={(e) => handleCollaboratorLogoChange(index, e.target.files[0])}
-                required
                 className={formErrors[`collaborator_logo_${index}`] ? 'border-red-500' : ''}
               />
               {formErrors[`collaborator_logo_${index}`] && (

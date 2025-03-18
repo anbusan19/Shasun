@@ -33,7 +33,9 @@ const generateCelebration = (req, res) => {
             date,
             time,
             venue,
-            organization
+            organization,
+            clubName,
+            collaborator
         } = req.body;
 
         const { eventImage } = req.files || {};
@@ -68,15 +70,21 @@ const generateCelebration = (req, res) => {
            .fontSize(20)
            .text('Internal Quality Assurance Cell (IQAC)', { align: 'center' });
         
-        doc.moveDown(0.2);
+        doc.moveDown(0.1);
         doc.text('&', { align: 'center' });
-        doc.moveDown(0.2);
-        doc.text('SHABASH', { align: 'center' });
-        doc.moveDown(0.2);
-        doc.text('(Entrepreneurship Development Cell)', { align: 'center' });
+        doc.moveDown(0.1);
+        doc.text(clubName, { align: 'center' });
+
+        // Add collaborator if provided
+        if (collaborator) {
+            doc.moveDown(0.1);
+            doc.fillColor([181, 13, 14])
+               .fontSize(20)
+               .text(`(${collaborator})`, { align: 'center' });
+        }
 
         // Add invitation text
-        doc.moveDown(1);
+        doc.moveDown(0.5);
         doc.fillColor([36, 27, 156])
            .fontSize(22)
            .text('Cordially invite you for the', { align: 'center' });
@@ -97,28 +105,41 @@ const generateCelebration = (req, res) => {
 
         // Add event image if provided
         if (eventImage?.[0]?.path) {
-            doc.moveDown(0.5);
-            const imgWidth = 250;  // Match college logo width
-            const imgHeight = 80;   // Match college logo height
+            const imgWidth = 200;  // Fixed width
+            const imgHeight = 130;  // Fixed height
             const imgX = (doc.page.width - imgWidth) / 2;  // Center horizontally
+            doc.y = 360; // Position image higher on the page
             doc.image(eventImage[0].path, imgX, doc.y, { 
                 width: imgWidth,
                 height: imgHeight,
                 fit: [imgWidth, imgHeight],
                 align: 'center'
             });
-            doc.moveDown(6); // Reduced spacing after image for better layout
+            doc.y += imgHeight + 20; // Update Y position after image
+        } else {
+            doc.y = 320; // If no image, still maintain consistent spacing
         }
 
         // Add event slogan
         if (eventSlogan) {
-            doc.moveDown(0.4);  // Match spacing with title and tagline
-            doc.fillColor([36, 27, 156])
-               .font('Times-Italic')
+            doc.moveDown(0.4);
+            doc.fillColor([181, 13, 14])
+               .font('Times-BoldItalic')
                .fontSize(16)
-               .text(`"${eventSlogan}"`, { align: 'center' });
+               .text(`"${eventSlogan}"`, { 
+                   align: 'center',
+                   width: doc.page.width - 100, // Increase width for more content per line
+                   lineBreak: true
+               });
             doc.moveDown(0.5);
         }
+
+        // Add welcome text with more spacing
+        doc.moveDown(0.5);
+        doc.fillColor([0,128,0])
+           .fontSize(16)
+           .text('All are Welcome', { align: 'center' });
+        doc.moveDown(2.5); // Add more space before bottom section
 
         // Format date and time
         const [year, month, day] = date.split("-");
@@ -156,6 +177,7 @@ const generateCelebration = (req, res) => {
         const dateWidth = doc.widthOfString(dateText);
         const dateX = (doc.page.width - dateWidth) / 2;
         doc.y = detailsY;
+        doc.moveDown(0.2)
         doc.fillColor([181, 13, 14])
            .text("Date: ", dateX, doc.y, { continued: true })
            .fillColor([36, 27, 156])
@@ -171,7 +193,7 @@ const generateCelebration = (req, res) => {
            .text(` ${monthName} ${year}`);
 
         // Time
-        doc.moveDown(0.5);
+        doc.moveDown(0.2);
         const timeText = `Time: ${formattedTime}`;
         const timeWidth = doc.widthOfString(timeText);
         const timeX = (doc.page.width - timeWidth) / 2;
@@ -179,7 +201,7 @@ const generateCelebration = (req, res) => {
            .fillColor([36, 27, 156]).text(formattedTime);
 
         // Venue
-        doc.moveDown(0.5);
+        doc.moveDown(0.2);
         const venueText = `Venue: ${venue}${organization ? ', Academic Block-' : ''}${organization || ''}`;
         const venueWidth = doc.widthOfString(venueText);
         const venueX = (doc.page.width - venueWidth) / 2;
@@ -187,7 +209,7 @@ const generateCelebration = (req, res) => {
            .fillColor([36, 27, 156]).text(`${venue}${organization ? ', Academic Block-' : ''}${organization || ''}`);
 
         // Signatory Section
-        doc.moveDown(2);
+        doc.moveDown(0.5);
         const colWidth = doc.page.width / 3;
 
         doc.fillColor([36, 27, 156])

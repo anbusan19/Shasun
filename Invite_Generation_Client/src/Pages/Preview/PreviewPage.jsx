@@ -4,7 +4,7 @@ import "./PreviewPage.css";
 export default function PreviewPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { pdfUrl } = location.state || { pdfUrl: null };
+  const { pdfUrl, formType, formData } = location.state || { pdfUrl: null, formType: 'regular', formData: null };
 
   const handleDownload = () => {
     if (pdfUrl) {
@@ -13,6 +13,11 @@ export default function PreviewPage() {
       link.download = "invite.pdf";
       link.click();
     }
+  };
+
+  const handleEdit = () => {
+    const path = formType === 'celebration' ? '/celebration-form' : '/design-invitation';
+    navigate(path, { state: { formData } });
   };
 
   return (
@@ -27,7 +32,7 @@ export default function PreviewPage() {
         <button onClick={handleDownload} className="download-button">
           Download
         </button>
-        <button onClick={() => navigate("/design-invitation")} className="edit-button">
+        <button onClick={handleEdit} className="edit-button">
           Edit
         </button>
       </div>

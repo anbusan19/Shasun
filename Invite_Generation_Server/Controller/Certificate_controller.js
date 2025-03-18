@@ -103,11 +103,11 @@ const generateCertificate = (req, res) => {
         }
         
         if (collaboratorLogos) {
-            const rightLogosWidth = 70;
+            const rightLogosWidth = 80;
             collaboratorLogos.forEach((logo, index) => {
                 if (logo?.path) {
-                    const posX = doc.page.width - 70 - (rightLogosWidth * (index + 1)) - (10 * index);
-                    doc.image(logo.path, posX, logoY, { width: rightLogosWidth, height: 70 });
+                    const posX = doc.page.width - 60 - (rightLogosWidth * (index + 1)) - (10 * index); // Changed from -80 to -60
+                    doc.image(logo.path, posX, logoY, { width: rightLogosWidth, height: 80 });
                 }
             });
         }
@@ -115,10 +115,10 @@ const generateCertificate = (req, res) => {
         doc.y = logoY + 100;
         doc.fillColor('#000').font('Times-Bold').fontSize(14);
         doc.fillColor([181,13,14]).font('Times-Bold').fontSize(20).text(`${"Internal Quality Assurance Cell (IQAC)"}`, { align: 'center' });
-            doc.moveDown(0.2);
+            doc.moveDown(0.1);
             if (clubName) {
                 doc.fillColor([181,13,14]).font('Times-Bold').fontSize(20).text("&", { align: 'center' });
-                doc.moveDown(0.2);
+                doc.moveDown(0.1);
             }
             
            if (clubName) {
@@ -126,7 +126,7 @@ const generateCertificate = (req, res) => {
                 `${clubName}${department ? ' of' : ''}`, 
                 { align: 'center' }
               );            
-            doc.moveDown(0.2);
+            doc.moveDown(0.1);
            } if (department && course) {
                 doc.fillColor([181,13,14]).font('Times-Bold').text(`${department} Department of ${course}`, { align: 'center' });
            }
@@ -163,9 +163,9 @@ const generateCertificate = (req, res) => {
 
         doc.fillColor([36, 27, 156])
            .font('Times-Bold')
-           .fontSize(22)
+           .fontSize(18)
            .text(`Cordially invites you for the`, { align: 'center' });
-        doc.moveDown(0.3);
+        doc.moveDown(0.2);
 
         if (eventType) {
             doc.fillColor([181,13,14])
@@ -175,43 +175,38 @@ const generateCertificate = (req, res) => {
         } else {
             doc.fillColor([181,13,14])
                .font('Times-Bold')
-               .fontSize(26)
+               .fontSize(24)
                .text(`${eventTitle}`, { align: 'center' });
         }
-        
-        doc.moveDown(0.3);
-        doc.fillColor([181,13,14])
-           .font('Times-Bold')
-           .fontSize(18)
-           .text(subtitle, { align: 'center' });
-        doc.moveDown(0.5);
+
+        doc.moveDown(0.1);
 
         if (titlesArray.length > 0) {
             let formattedTitles = titlesArray.join("\n");
         
             doc.fillColor([181, 13, 14])
                .font('Times-Bold')
-               .fontSize(20)
+               .fontSize(18)
                .text("On", { align: 'center' })
                .text(formattedTitles, { align: 'center' })
-               .moveDown(0.5);
+               .moveDown(0.3);
         }
 
         // Resource People Section (only if chief guests exist)
         if (chiefGuestsArray && chiefGuestsArray.length > 0 ) {
-            doc.moveDown(0.3);
+            doc.moveDown(0.2);
             if (chiefGuestsArray && chiefGuestsArray.length > 1) {
                 doc.fillColor([181,13,14])
                    .font('Times-Bold')
-                   .fontSize(22)
+                   .fontSize(20)
                    .text("Resource People", { align: 'center' });
             } else {
                 doc.fillColor([181,13,14])
                    .font('Times-Bold')
-                   .fontSize(22)
+                   .fontSize(20)
                    .text("Resource Person", { align: 'center' });
             }
-            doc.moveDown(0.5);
+            doc.moveDown(0.1);
         }
                   
         // Chief Guest Section
@@ -266,11 +261,11 @@ const generateCertificate = (req, res) => {
                    width: textWidth
                });
 
-            doc.moveDown(0.2);
+            doc.moveDown(0.1);
            
             // Render designation with larger font
             doc.font('Times-Bold')
-               .fontSize(18)
+               .fontSize(16)
                .fillColor([36, 27, 156])
                .text(designation, guestX - (textWidth / 2) + (imageSize / 2), doc.y, {
                    align: 'center',
@@ -278,7 +273,7 @@ const generateCertificate = (req, res) => {
                });
 
             if (additionalText) {
-                doc.moveDown(0.2);
+                doc.moveDown(0.1);
                 doc.font('Times-Bold')
                    .fontSize(16)
                    .fillColor([36, 27, 156])
@@ -293,8 +288,8 @@ const generateCertificate = (req, res) => {
 
         // Move date, time and venue to bottom
         // Calculate position above signatories
-        const signatoryY = doc.page.height - 107;
-        const detailsY = signatoryY - 100; // Position details 100 points above signatories
+        const signatoryY = doc.page.height - 90;
+        const detailsY = signatoryY - 90;
 
         // Function to get ordinal suffix
         const getOrdinalSuffix = (day) => {
@@ -379,7 +374,7 @@ const generateCertificate = (req, res) => {
         }
 
         // Time
-        doc.moveDown(0.5);
+        doc.moveDown(0.2);
         const timeText = `Time: ${formattedTime}`;
         const timeWidth = doc.widthOfString(timeText);
         const timeX = (doc.page.width - timeWidth) / 2;
@@ -387,7 +382,7 @@ const generateCertificate = (req, res) => {
            .fillColor([36, 27, 156]).text(formattedTime);
 
         // Venue
-        doc.moveDown(0.5);
+        doc.moveDown(0.2);
         const venueText = `Venue: ${venue}${organization ? ', Academic Block-' : ''}${organization || ''}`;
         const venueWidth = doc.widthOfString(venueText);
         const venueX = (doc.page.width - venueWidth) / 2;
@@ -395,7 +390,7 @@ const generateCertificate = (req, res) => {
            .fillColor([36, 27, 156]).text(`${venue}${organization ? ', Academic Block-' : ''}${organization || ''}`);
 
         // Signatory Section
-        doc.moveDown(2);
+        doc.moveDown(6);
         const bottomY = doc.page.height - 107;
         const colWidth = doc.page.width / 3;
 
@@ -434,7 +429,7 @@ const generateCertificate = (req, res) => {
                 doc.font('Times-Bold')
                    .fontSize(18)
                    .fillColor([48,57,77])
-                   .text("Agenda:", doc.page.margins.left, doc.y);
+                   .text(`Agenda (${date.split('-').reverse().join('.')}):`, doc.page.margins.left, doc.y);
                 
                 doc.moveDown(2);
                 doc.font('Times-Bold').fontSize(18).fillColor([48,57,77]);
