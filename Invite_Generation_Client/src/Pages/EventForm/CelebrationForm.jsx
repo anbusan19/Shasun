@@ -88,10 +88,6 @@ export default function CelebrationForm() {
       errors.venue = 'Venue is required';
       hasErrors = true;
     }
-    if (!formData.clubName) {
-      errors.clubName = 'Club Name is required';
-      hasErrors = true;
-    }
     if (!eventImage) {
       errors.eventImage = 'Event Image is required';
       hasErrors = true;
@@ -177,32 +173,27 @@ export default function CelebrationForm() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Club Name */}
         <div className="space-y-2">
-          <label htmlFor="clubName">Club Name:*</label>
+          <label htmlFor="clubName">Department:</label>
           <input 
             type="text" 
             id="clubName"
             name="clubName"
             value={formData.clubName}
             onChange={handleChange} 
-            placeholder="Enter club name"
-            className={formErrors.clubName ? 'border-red-500' : ''}
-            required
+            placeholder="Enter Department"
           />
-          {formErrors.clubName && (
-            <p className="text-red-500 text-sm">{formErrors.clubName}</p>
-          )}
         </div>
 
         {/* Collaborator */}
         <div className="space-y-2">
-          <label htmlFor="collaborator">Collaborator:</label>
+          <label htmlFor="collaborator">Additional Information:</label>
           <input 
             type="text" 
             id="collaborator"
             name="collaborator"
             value={formData.collaborator}
             onChange={handleChange} 
-            placeholder="Enter collaborator name (if any)"
+            placeholder="Enter Additional Information (if any)"
           />
         </div>
 

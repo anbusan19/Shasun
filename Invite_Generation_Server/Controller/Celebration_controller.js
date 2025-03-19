@@ -71,9 +71,11 @@ const generateCelebration = (req, res) => {
            .text('Internal Quality Assurance Cell (IQAC)', { align: 'center' });
         
         doc.moveDown(0.1);
-        doc.text('&', { align: 'center' });
-        doc.moveDown(0.1);
-        doc.text(clubName, { align: 'center' });
+        if (clubName && clubName.trim()) {
+            doc.text('&', { align: 'center' });
+            doc.moveDown(0.1);
+            doc.text(clubName, { align: 'center' });
+        }
 
         // Add collaborator if provided
         if (collaborator) {

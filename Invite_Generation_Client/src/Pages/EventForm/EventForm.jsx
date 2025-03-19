@@ -371,10 +371,6 @@ export default function CertificateForm() {
       errors.time = 'Time is required';
       hasErrors = true;
     }
-    if (!formData.clubName) {
-      errors.clubName = 'Club Name is required';
-      hasErrors = true;
-    }
     if (!formData.eventType && !formData.eventTitle) {
       errors.eventType = 'Either Event Type or Event Title is required';
       hasErrors = true;
@@ -589,11 +585,10 @@ export default function CertificateForm() {
 
         {/* Collaborators Section */}
         <div className="space-y-4">
-          <label>Number of Collaborators (Max 2):*</label>
+          <label>Number of Collaborators (Max 2):</label>
           <select 
             value={numCollaborators} 
             onChange={handleNumCollaboratorsChange} 
-            required
           >
             <option value="">Select number of collaborators</option>
             <option value={0}>0</option>
@@ -605,31 +600,22 @@ export default function CertificateForm() {
               <h3>Collaborator {index + 1}</h3>
               <input
                 type="text"
-                placeholder="Name*"
+                placeholder="Name"
                 value={collab.name}
                 onChange={(e) => handleCollaboratorChange(index, e.target.value)}
-                required
-                className={formErrors[`collaborator_name_${index}`] ? 'border-red-500' : ''}
               />
-              {formErrors[`collaborator_name_${index}`] && (
-                <p className="text-red-500 text-sm">{formErrors[`collaborator_name_${index}`]}</p>
-              )}
               <input
                 type="file"
                 name="collaboratorLogos"
                 onChange={(e) => handleCollaboratorLogoChange(index, e.target.files[0])}
-                className={formErrors[`collaborator_logo_${index}`] ? 'border-red-500' : ''}
               />
-              {formErrors[`collaborator_logo_${index}`] && (
-                <p className="text-red-500 text-sm">{formErrors[`collaborator_logo_${index}`]}</p>
-              )}
             </div>
           ))}
         </div>
         
         {/* Club & Club Logo */}
         <div className="flex items-center space-x-2">
-          <label htmlFor="clubName" style={{ marginBottom: '4px'}}>Club Name:*</label>
+          <label htmlFor="clubName" style={{ marginBottom: '4px'}}>Club Name:</label>
           <input 
             type="text" 
             id="clubName"
@@ -637,8 +623,6 @@ export default function CertificateForm() {
             placeholder="Club Name" 
             value={formData.clubName}
             onChange={handleChange} 
-            required
-            className={formErrors.clubName ? 'border-red-500' : ''}
           />
           <label htmlFor="clubLogo">Club Logo:</label>
           <input 

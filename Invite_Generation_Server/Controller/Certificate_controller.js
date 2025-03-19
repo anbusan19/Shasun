@@ -86,9 +86,9 @@ const generateCertificate = (req, res) => {
 
         // Logos Section
         const logoY = 60;
-        const logoHeight = 80;
+        const logoHeight = 75;
         const collegeLogoWidth = 250; // Reduced width for better proportion
-        const sideLogoWidth = 80; // Width for club and collaborator logos
+        const sideLogoWidth = 75; // Width for club and collaborator logos
         
         // Center the college logo
         const collegeLogoX = (doc.page.width - collegeLogoWidth) / 2;
@@ -99,7 +99,7 @@ const generateCertificate = (req, res) => {
 
         // Place club logo on the left if it exists
         if (clubLogo?.[0]?.path) {
-            const leftLogoX = 90; // Fixed left position
+            const leftLogoX = 100; // Fixed left position
             doc.image(clubLogo[0].path, leftLogoX, logoY, { width: sideLogoWidth, height: logoHeight });
         }
         
@@ -107,8 +107,8 @@ const generateCertificate = (req, res) => {
         if (collaboratorLogos) {
             collaboratorLogos.forEach((logo, index) => {
                 if (logo?.path && index < 2) { // Limit to 2 collaborator logos
-                    const rightLogoX = doc.page.width - 20 - (sideLogoWidth * (index + 1)) - (5 * index); // 20px spacing between logos
-                    doc.image(logo.path, rightLogoX, logoY, { width: sideLogoWidth, height: logoHeight });
+                    const rightLogoX = 420 + (85 * index); // 5px spacing between logos
+                    doc.image(logo.path, rightLogoX, logoY, { width: 75, height: 75 });
                 }
             });
         }
