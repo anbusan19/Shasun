@@ -107,7 +107,7 @@ const generateCertificate = (req, res) => {
         if (collaboratorLogos) {
             collaboratorLogos.forEach((logo, index) => {
                 if (logo?.path && index < 2) { // Limit to 2 collaborator logos
-                    const rightLogoX = 420 + (85 * index); // 5px spacing between logos
+                    const rightLogoX = 423 + (85 * index); // 5px spacing between logos
                     doc.image(logo.path, rightLogoX, logoY, { width: 75, height: 75 });
                 }
             });
@@ -134,32 +134,21 @@ const generateCertificate = (req, res) => {
         
         doc.moveDown(0);
 
-        if ((collaborationArray && collaborationArray.length > 0) || (collaboratorsArray && collaboratorsArray.length > 0)) {
-            doc.font('Times-Bold')
-               .fontSize(14)
-               .text(`In Collaboration with`, { align: 'center' });
-            doc.moveDown(0);
+        // Check if there are collaborators with names
+        const collaboratorsWithNames = collaboratorsArray.filter(collab => collab.name && collab.name.trim());
         
-            let formattedCollaborators = "";
-        
-            if (collaboratorsArray.length > 0) {
-                formattedCollaborators = collaboratorsArray.map(collab => collab.name).join("\n");
-            }
-        
-            if (collaborationArray.length > 0) {
-                let legacyNames = collaborationArray.join("\n");
-                formattedCollaborators = formattedCollaborators 
-                    ? legacyNames + "\n" + formattedCollaborators 
-                    : legacyNames;
-            }
-        
-            doc.fillColor([181, 13, 14])
-               .font('Times-Bold')
-               .fontSize(20)
-               .text(formattedCollaborators, { align: 'center' });
-            
-        } else {
-            doc.moveDown();
+        if (collaboratorsWithNames.length > 0) {
+            doc.moveDown(0.1);
+            doc.text('in collaboration with', { align: 'center' });
+            doc.moveDown(0.1);
+            collaboratorsWithNames.forEach((collaborator, index) => {
+                doc.text(collaborator.name, { align: 'center' });
+                if (index < collaboratorsWithNames.length - 1) {
+                    doc.moveDown(0.1);
+                    doc.text('&', { align: 'center' });
+                    doc.moveDown(0.1);
+                }
+            });
         }
 
         doc.fillColor([36, 27, 156])

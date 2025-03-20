@@ -376,16 +376,6 @@ export default function CertificateForm() {
       hasErrors = true;
     }
 
-    // Validate collaborators
-    if (numCollaborators > 0) {
-      collaboratorsData.forEach((collab, index) => {
-        if (!collab.name) {
-          errors[`collaborator_name_${index}`] = `Name is required for Collaborator ${index + 1}`;
-          hasErrors = true;
-        }
-      });
-    }
-
     // Validate chief guest data
     if (!validateChiefGuestData()) {
       hasErrors = true;
@@ -600,7 +590,7 @@ export default function CertificateForm() {
               <h3>Collaborator {index + 1}</h3>
               <input
                 type="text"
-                placeholder="Name"
+                placeholder="Name (Optional)"
                 value={collab.name}
                 onChange={(e) => handleCollaboratorChange(index, e.target.value)}
               />
