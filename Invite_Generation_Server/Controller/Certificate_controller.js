@@ -139,7 +139,7 @@ const generateCertificate = (req, res) => {
         
         if (collaboratorsWithNames.length > 0) {
             doc.moveDown(0.1);
-            doc.text('in collaboration with', { align: 'center' });
+            doc.text('In collaboration with', { align: 'center' });
             doc.moveDown(0.1);
             collaboratorsWithNames.forEach((collaborator, index) => {
                 doc.text(collaborator.name, { align: 'center' });
