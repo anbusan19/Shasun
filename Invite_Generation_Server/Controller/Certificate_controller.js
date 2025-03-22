@@ -117,10 +117,10 @@ const generateCertificate = (req, res) => {
         doc.fillColor('#000').font('Times-Bold').fontSize(14);
         doc.fillColor([181,13,14]).font('Times-Bold').fontSize(20).text(`${"Internal Quality Assurance Cell (IQAC)"}`, { align: 'center' });
             doc.moveDown(0.1);
-            if (clubName) {
+            
                 doc.fillColor([181,13,14]).font('Times-Bold').fontSize(20).text("&", { align: 'center' });
                 doc.moveDown(0.1);
-            }
+            
             
            if (clubName) {
             doc.fillColor([181, 13, 14]).font('Times-Bold').text(
