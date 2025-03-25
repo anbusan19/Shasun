@@ -145,8 +145,6 @@ const generateCertificate = (req, res) => {
                 doc.text(collaborator.name, { align: 'center' });
                 if (index < collaboratorsWithNames.length - 1) {
                     doc.moveDown(0.1);
-                    doc.text('&', { align: 'center' });
-                    doc.moveDown(0.1);
                 }
             });
         }
